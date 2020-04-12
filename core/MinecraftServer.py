@@ -26,8 +26,8 @@ class MinecraftServer:
         status = server.status()
         player_count = status.players.online
 
-        output = str(subprocess.check_output("mcstatus " + str(self.ip) + " status",
-                     shell=True))
+        command = "mcstatus {} status".format(self.ip)
+        output = str(subprocess.check_output(command, shell=True))
         players_online = self.player_list(output)
 
         return (player_count, players_online)
