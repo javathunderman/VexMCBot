@@ -1,20 +1,14 @@
 import asyncio
+import logging
+import os
+import sys
 
-import discord
-from discord.ext.commands import Bot
-from discord.ext import commands
+import pykeybasebot.types.chat1 as chat1
+from pykeybasebot import Bot
 
 from MinecraftServer import MinecraftServer
 
-
-Client = discord.Client()
-client = commands.Bot(command_prefix = "!")
-
-client.remove_command("help")
-
-serverTU = MinecraftServer("Vextossup.join-mc.net")
-serverTT = MinecraftServer("51.161.120.109:25616")
-serverSA = MinecraftServer("sackattack.join-game.net")
+serverDefault = MinecraftServer("")
 
 
 def format_response(response):
@@ -30,45 +24,31 @@ def format_response(response):
 
     return reply
 
-
-@client.event
-async def on_ready():
-    print("Bot is ready!")
-
-
-@client.command()
-async def tu(ctx):
-    lookup = serverTU.server_lookup()
-    response = format_response(lookup)
-
-    await ctx.send(response)
+if "win32" in sys.platform:
+    asyncio.set_event_loop_policy(
+        asyncio.WindowsProactorEventLoopPolicy()
+    )
 
 
-@client.command()
-async def tt(ctx):
-    lookup = serverTT.server_lookup()
-    response = format_response(lookup)
-
-    await ctx.send(response)
-
-
-@client.command()
-async def sa(ctx):
-    lookup = serverSA.server_lookup()
-    response = format_response(lookup)
-
-    await ctx.send(response)
+async def handler(bot, event):
+    if event.msg.content.type_name != chat1.MessageTypeStrings.TEXT.value:
+        return
+    if event.msg.content.text.body == "!players":
+        lookup = serverDefault.server_lookup()
+        response = format_response(lookup)
+        channel = event.msg.channel
+        await bot.chat.send(channel, response)
 
 
-@client.command()
-async def help(ctx):
-    reply = "```\n!tu\tToss Up\n!tt\tTower Takeover\n!sa\tSack Attack\n```"
 
-    await ctx.send(reply)
+listen_options = {"filter-channels": [
+ {
+     "name": "nomik",
+     "topic_name": "general",
+     "members_type": "team",
+ },
+]}
 
+bot = Bot(username="javathunderman", paperkey="", handler=handler)
 
-with open("token.txt", "r") as f:
-    lines = f.readlines()
-    token = lines[0].strip()
-
-client.run(token)
+asyncio.run(bot.start(listen_options))
