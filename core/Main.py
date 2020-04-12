@@ -1,11 +1,12 @@
-import subprocess
+import asyncio
 
 import discord
 from discord.ext.commands import Bot
 from discord.ext import commands
 from mcstatus import MinecraftServer
 
-import asyncio
+from MinecraftServer import MinecraftServer
+
 
 
 Client = discord.Client()
@@ -13,35 +14,21 @@ client = commands.Bot(command_prefix = "!")
 
 client.remove_command("help")
 
-
-def player_list(input):
-    index = input.find("[")
-
-    if index == -1:
-        return []
-
-    lst_string = input[index+1:-4]
-    lst = lst_string.split(", ")
-    lst = [s.split(" ")[0][2:] for s in lst]
-
-    return lst
+serverTU = MinecraftServer("Vextossup.join-mc.net")
+serverTT = MinecraftServer("51.161.120.109:25616")
+serverSA = MinecraftServer("sackattack.join-game.net")
 
 
-def server_lookup(ip):
-    server = MinecraftServer.lookup(ip)
-    status = server.status()
-    player_count = status.players.online
+def format_response(response):
+    count = response[0]
+    players = response[1]
 
-    output = str(subprocess.check_output("mcstatus " + str(ip) + " status",
-                 shell=True))
-    players_online = player_list(output)
-
-    if player_count == 0:
+    if count == 0:
         reply = "0 players."
-    elif player_count == 1:
-        reply = str(player_count) + " player:" + "```" + "\n" + "\n".join(players_online) + "\n" + "```"
+    elif count == 1:
+        reply = str(count) + " player:" + "```" + "\n" + "\n".join(players) + "\n" + "```"
     else:
-        reply = str(player_count) + " players:" + "```" + "\n" + "\n".join(players_online) + "\n" + "```"
+        reply = str(count) + " players:" + "```" + "\n" + "\n".join(players) + "\n" + "```"
 
     return reply
 
@@ -53,21 +40,24 @@ async def on_ready():
 
 @client.command()
 async def tu(ctx):
-    response = server_lookup("Vextossup.join-mc.net")
+    lookup = serverTU.server_lookup()
+    response = format_response(lookup)
 
     await ctx.send(response)
 
 
 @client.command()
 async def tt(ctx):
-    response = server_lookup("51.161.120.109:25616")
+    lookup = serverTT.server_lookup()
+    response = format_response(lookup)
 
     await ctx.send(response)
 
 
 @client.command()
 async def sa(ctx):
-    response = server_lookup("sackattack.join-game.net")
+    lookup = serverSA.server_lookup()
+    response = format_response(lookup)
 
     await ctx.send(response)
 
