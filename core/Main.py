@@ -26,9 +26,9 @@ def format_response(response):
     if count == 0:
         reply = "0 players."
     elif count == 1:
-        reply = str(count) + " player:" + "```" + "\n" + "\n".join(players) + "\n" + "```"
+        reply = "{} player:```\n{}\n```".format(str(count), "\n".join(players))
     else:
-        reply = str(count) + " players:" + "```" + "\n" + "\n".join(players) + "\n" + "```"
+        reply = "{} players:```\n{}\n```".format(str(count), "\n".join(players))
 
     return reply
 
@@ -64,7 +64,7 @@ async def sa(ctx):
 
 @client.command()
 async def help(ctx):
-    reply = "```\n" + "!tu \t Toss Up" + "\n" + "!tt \t Tower Takeover" + "\n" + "!sa \t Sack Attack" + "\n```"
+    reply = "```\n!tu\tToss Up\n!tt\tTower Takeover\n!sa\tSack Attack\n```"
 
     await ctx.send(reply)
 
